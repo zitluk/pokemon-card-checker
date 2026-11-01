@@ -65,8 +65,7 @@ fun SearchScreen(
             }
         },
     ) {
-        ResponsiveScreenScope {
-            val metrics = rememberResponsiveMetrics()
+        ResponsiveScreenScope { metrics ->
             Column(Modifier.fillMaxSize()) {
                 OutlinedTextField(
                     value = state.query,

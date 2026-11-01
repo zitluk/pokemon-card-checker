@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.pokemontcg.collection.R
@@ -21,13 +22,18 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun CardThumbnail(imageUrl: String?, contentDescription: String, modifier: Modifier = Modifier) {
+fun CardThumbnail(
+    imageUrl: String?,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    height: Dp = 220.dp,
+) {
     AsyncImage(
         model = imageUrl,
         contentDescription = contentDescription,
         modifier = modifier
             .fillMaxWidth()
-            .height(220.dp),
+            .height(height),
         contentScale = ContentScale.Fit,
     )
 }

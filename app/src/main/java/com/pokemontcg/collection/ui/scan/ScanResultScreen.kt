@@ -39,8 +39,9 @@ import com.pokemontcg.collection.ui.components.TcgCardBody
 import com.pokemontcg.collection.ui.components.TcgCardTile
 import com.pokemontcg.collection.ui.components.TcgCardTitle
 import com.pokemontcg.collection.ui.components.WatermarkedScreen
+import com.pokemontcg.collection.ui.layout.ResponsiveContentColumn
 import com.pokemontcg.collection.ui.layout.ResponsiveScreenScope
-import com.pokemontcg.collection.ui.layout.rememberResponsiveMetrics
+import com.pokemontcg.collection.ui.layout.safeBottomInsets
 import com.pokemontcg.collection.ui.theme.TcgChrome
 import com.pokemontcg.collection.ui.theme.TcgColors
 
@@ -61,8 +62,7 @@ fun ScanResultScreen(
     }
 
     WatermarkedScreen(Modifier.fillMaxSize().padding(contentPadding)) {
-        ResponsiveScreenScope {
-            val metrics = rememberResponsiveMetrics()
+        ResponsiveScreenScope { metrics ->
             Scaffold(
                 containerColor = TcgColors.PlaymatSurface.copy(alpha = 0f),
                 topBar = {
@@ -87,8 +87,12 @@ fun ScanResultScreen(
                         Row(
                             Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = metrics.horizontalPadding, vertical = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                .safeBottomInsets()
+                                .padding(
+                                    horizontal = metrics.horizontalPadding,
+                                    vertical = metrics.verticalSpacing,
+                                ),
+                            horizontalArrangement = Arrangement.spacedBy(metrics.verticalSpacing),
                         ) {
                             OutlinedButton(
                                 onClick = {
@@ -113,16 +117,18 @@ fun ScanResultScreen(
                     }
                 },
             ) { innerPadding ->
-                Column(
+                Box(
                     Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(horizontal = metrics.horizontalPadding),
+                        .padding(innerPadding),
                 ) {
                     when {
                         state.isLoading -> {
                             Column(
-                                Modifier.fillMaxWidth().padding(top = 32.dp),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 32.dp)
+                                    .padding(horizontal = metrics.horizontalPadding),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
@@ -135,88 +141,97 @@ fun ScanResultScreen(
                             }
                         }
                         state.error != null -> {
-                            Text(
-                                scanResultErrorMessage(state.error!!),
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(vertical = metrics.verticalSpacing),
-                            )
-                            state.ocrPreview?.let {
+                            ResponsiveContentColumn(metrics) {
                                 Text(
-                                    it,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TcgColors.OnPlaymatMuted,
+                                    scanResultErrorMessage(state.error!!),
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.padding(vertical = metrics.verticalSpacing),
                                 )
-                            }
-                            Button(
-                                onClick = {
-                                    viewModel.discardCapture()
-                                    onDiscard()
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = TcgChrome.primaryButtonColors(),
-                            ) {
-                                Text(stringResource(R.string.scan_result_back_to_scan))
-                            }
-                        }
-                        else -> {
-                            val card = state.card ?: return@Column
-                            Column(
-                                Modifier
-                                    .fillMaxSize()
-                                    .verticalScroll(rememberScrollState()),
-                                verticalArrangement = Arrangement.spacedBy(metrics.verticalSpacing),
-                            ) {
-                                if (state.fromCacheOnly) {
+                                state.ocrPreview?.let {
                                     Text(
-                                        stringResource(R.string.scan_result_cache_partial),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = TcgColors.FrameGoldBright,
-                                    )
-                                }
-                                TcgCardTile {
-                                    CardThumbnail(card.imageUrl, card.name)
-                                    TcgCardTitle(card.name)
-                                    TcgCardBody(
-                                        card.setName ?: stringResource(R.string.collection_unknown_set),
-                                        muted = true,
-                                    )
-                                    card.localId?.let {
-                                        TcgCardBody(
-                                            stringResource(R.string.scan_result_card_number, it),
-                                            muted = true,
-                                        )
-                                    }
-                                    card.rarity?.let { TcgCardBody(it) }
-                                    PriceTextOnCard(card.priceEur, card.priceUpdatedAt, card.isPriceStale)
-                                }
-                                state.authenticityScore?.let { score ->
-                                    TcgCardTile {
-                                        Text(
-                                            stringResource(R.string.scan_result_authenticity, score),
-                                            style = MaterialTheme.typography.titleLarge,
-                                            color = TcgColors.CardInk,
-                                        )
-                                        LinearProgressIndicator(
-                                            progress = { score / 100f },
-                                            modifier = Modifier.fillMaxWidth(),
-                                            color = TcgColors.FrameGoldBright,
-                                            trackColor = TcgColors.OnPlaymatMuted.copy(alpha = 0.3f),
-                                        )
-                                        Text(
-                                            stringResource(R.string.scan_result_authenticity_subtitle),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = TcgColors.CardInkMuted,
-                                        )
-                                    }
-                                }
-                                state.usedQuery?.let { query ->
-                                    Text(
-                                        stringResource(R.string.scan_query_used, query),
+                                        it,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = TcgColors.OnPlaymatMuted,
                                     )
                                 }
-                                Box(Modifier.padding(bottom = 24.dp))
+                                Button(
+                                    onClick = {
+                                        viewModel.discardCapture()
+                                        onDiscard()
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = TcgChrome.primaryButtonColors(),
+                                ) {
+                                    Text(stringResource(R.string.scan_result_back_to_scan))
+                                }
+                            }
+                        }
+                        else -> {
+                            val card = state.card ?: return@Box
+                            ResponsiveContentColumn(metrics) {
+                                Column(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .verticalScroll(rememberScrollState())
+                                        .padding(vertical = metrics.verticalSpacing),
+                                    verticalArrangement = Arrangement.spacedBy(metrics.verticalSpacing),
+                                ) {
+                                    if (state.fromCacheOnly) {
+                                        Text(
+                                            stringResource(R.string.scan_result_cache_partial),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = TcgColors.FrameGoldBright,
+                                        )
+                                    }
+                                    TcgCardTile {
+                                        CardThumbnail(
+                                            card.imageUrl,
+                                            card.name,
+                                            height = metrics.cardThumbnailHeight,
+                                        )
+                                        TcgCardTitle(card.name)
+                                        TcgCardBody(
+                                            card.setName ?: stringResource(R.string.collection_unknown_set),
+                                            muted = true,
+                                        )
+                                        card.localId?.let {
+                                            TcgCardBody(
+                                                stringResource(R.string.scan_result_card_number, it),
+                                                muted = true,
+                                            )
+                                        }
+                                        card.rarity?.let { TcgCardBody(it) }
+                                        PriceTextOnCard(card.priceEur, card.priceUpdatedAt, card.isPriceStale)
+                                    }
+                                    state.authenticityScore?.let { score ->
+                                        TcgCardTile {
+                                            Text(
+                                                stringResource(R.string.scan_result_authenticity, score),
+                                                style = MaterialTheme.typography.titleLarge,
+                                                color = TcgColors.CardInk,
+                                            )
+                                            LinearProgressIndicator(
+                                                progress = { score / 100f },
+                                                modifier = Modifier.fillMaxWidth(),
+                                                color = TcgColors.FrameGoldBright,
+                                                trackColor = TcgColors.OnPlaymatMuted.copy(alpha = 0.3f),
+                                            )
+                                            Text(
+                                                stringResource(R.string.scan_result_authenticity_subtitle),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = TcgColors.CardInkMuted,
+                                            )
+                                        }
+                                    }
+                                    state.usedQuery?.let { query ->
+                                        Text(
+                                            stringResource(R.string.scan_query_used, query),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = TcgColors.OnPlaymatMuted,
+                                        )
+                                    }
+                                    Box(Modifier.padding(bottom = 24.dp))
+                                }
                             }
                         }
                     }

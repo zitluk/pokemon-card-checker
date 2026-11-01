@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -96,7 +97,7 @@ fun PokemonAppNav(factory: AppViewModelFactory) {
         NavHost(
             navController = navController,
             startDestination = Routes.COLLECTION,
-            modifier = Modifier,
+            modifier = Modifier.fillMaxSize(),
         ) {
             composable(Routes.COLLECTION) {
                 val collectionVm: CollectionViewModel = viewModel(factory = factory)

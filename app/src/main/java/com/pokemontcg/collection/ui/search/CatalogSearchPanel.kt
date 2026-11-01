@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,6 +25,7 @@ import com.pokemontcg.collection.ui.components.TcgCardBody
 import com.pokemontcg.collection.ui.components.TcgCardTile
 import com.pokemontcg.collection.ui.components.TcgCardTitle
 import com.pokemontcg.collection.ui.layout.ResponsiveMetrics
+import com.pokemontcg.collection.ui.layout.responsiveGridCells
 import com.pokemontcg.collection.ui.theme.TcgColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,10 +102,10 @@ fun CatalogSearchPanel(
                 color = TcgColors.FrameGoldBright,
             )
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = responsiveGridCells(metrics),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 280.dp)
+                    .heightIn(max = metrics.searchResultsMaxHeight)
                     .padding(horizontal = metrics.horizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(metrics.verticalSpacing),
                 verticalArrangement = Arrangement.spacedBy(metrics.verticalSpacing),

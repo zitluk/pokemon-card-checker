@@ -28,6 +28,7 @@ fun PokemonBrandHeader(
     screenTitle: String,
     modifier: Modifier = Modifier,
     horizontalPadding: Dp = 16.dp,
+    logoMaxHeight: Dp = 160.dp,
 ) {
     Column(
         modifier
@@ -41,7 +42,7 @@ fun PokemonBrandHeader(
         ) {
             // Width drives size: span full content width (minus 8dp side inset on the image).
             val logoWidth = maxWidth - 16.dp
-            val logoHeight = logoWidth / LOGO_ASPECT_RATIO
+            val logoHeight = minOf(logoWidth / LOGO_ASPECT_RATIO, logoMaxHeight)
 
             Image(
                 painter = painterResource(R.drawable.logo_pokemon_official),

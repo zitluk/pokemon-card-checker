@@ -34,7 +34,6 @@ import com.pokemontcg.collection.ui.components.TcgCardTitle
 import com.pokemontcg.collection.ui.components.WatermarkedScreen
 import com.pokemontcg.collection.ui.layout.ResponsiveContentColumn
 import com.pokemontcg.collection.ui.layout.ResponsiveScreenScope
-import com.pokemontcg.collection.ui.layout.rememberResponsiveMetrics
 import com.pokemontcg.collection.ui.theme.TcgChrome
 import kotlinx.coroutines.launch
 
@@ -53,8 +52,7 @@ fun CardDetailScreen(
     LaunchedEffect(cardId) { viewModel.load(cardId) }
 
     WatermarkedScreen(Modifier.fillMaxSize().padding(contentPadding)) {
-        ResponsiveScreenScope {
-            val metrics = rememberResponsiveMetrics()
+        ResponsiveScreenScope { metrics ->
             Column(Modifier.fillMaxSize()) {
                 TopAppBar(
                     title = { Text(state.card?.name ?: stringResource(R.string.card_detail_title)) },
@@ -94,7 +92,11 @@ fun CardDetailScreen(
                                     verticalArrangement = Arrangement.spacedBy(metrics.verticalSpacing),
                                 ) {
                                 TcgCardTile {
-                                    CardThumbnail(card.imageUrl, card.name)
+                                    CardThumbnail(
+                                        card.imageUrl,
+                                        card.name,
+                                        height = metrics.cardThumbnailHeight,
+                                    )
                                     TcgCardTitle(card.name)
                                     TcgCardBody(
                                         card.setName ?: stringResource(R.string.collection_unknown_set),

@@ -112,13 +112,12 @@ fun ScanScreen(
                 .padding(innerPadding),
             header = null,
         ) {
-            ResponsiveScreenScope {
-                val metrics = rememberResponsiveMetrics()
+            ResponsiveScreenScope { metrics ->
                 Column(
                     Modifier
                         .fillMaxSize()
                         .padding(horizontal = metrics.horizontalPadding)
-                        .padding(bottom = 16.dp),
+                        .padding(bottom = metrics.verticalSpacing + 8.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text(

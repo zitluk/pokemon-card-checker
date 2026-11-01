@@ -99,6 +99,8 @@ fun CollectionScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onStartScan,
+                modifier = Modifier
+                    .padding(end = 16.dp, bottom = 8.dp),
                 containerColor = TcgColors.FrameGoldBright,
                 contentColor = TcgColors.PlaymatSurface,
             ) {
@@ -113,17 +115,16 @@ fun CollectionScreen(
         modifier = Modifier.fillMaxSize().padding(innerPadding),
         header = {
             BoxWithConstraints(Modifier.fillMaxWidth()) {
-                val pad = (maxWidth.value * 0.04f).dp.coerceIn(12.dp, 28.dp)
+                val headerMetrics = rememberResponsiveMetrics()
                 PokemonBrandHeader(
                     screenTitle = stringResource(R.string.collection_title),
-                    horizontalPadding = pad,
+                    horizontalPadding = headerMetrics.horizontalPadding,
+                    logoMaxHeight = headerMetrics.logoMaxHeight,
                 )
             }
         },
     ) {
-        ResponsiveScreenScope {
-            val metrics = rememberResponsiveMetrics()
-            Box(Modifier.fillMaxSize()) {
+        ResponsiveScreenScope { metrics ->
             Column(Modifier.fillMaxSize()) {
                 StatsHeader(state.stats, metrics)
                 CatalogSearchPanel(
@@ -180,7 +181,6 @@ fun CollectionScreen(
                         }
                     }
                 }
-            }
             }
         }
     }
