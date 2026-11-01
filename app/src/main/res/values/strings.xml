@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">Pokemon Card Checker</string>
+
+    <!-- Navigace -->
+    <string name="nav_collection">Sbírka</string>
+    <string name="nav_search">Hledat</string>
+    <string name="nav_settings">Nastavení</string>
+    <string name="nav_scan">Sken</string>
+
+    <!-- Sbírka -->
+    <string name="collection_title">Moje sbírka</string>
+    <string name="collection_empty">Zatím nemáte žádné karty. Klepněte na „Vyfotit kartu“ nebo vyhledejte název v poli nahoře a přidejte kartu z detailu.</string>
+    <string name="collection_scan_fab">Vyfotit kartu</string>
+    <string name="collection_search_hint">Hledat v TCGdex…</string>
+    <string name="collection_search_results">Výsledky hledání</string>
+    <string name="collection_sort_label">Řazení: %1$s</string>
+    <string name="collection_stats_cards">%1$d karet · %2$d položek</string>
+    <string name="collection_stats_value">Odhad. hodnota %1$s</string>
+    <string name="collection_qty_condition">Množství %1$d · %2$s</string>
+    <string name="collection_edit_entry">Upravit položku</string>
+    <string name="collection_unknown_set">Neznámá sada</string>
+    <string name="price_refresh_message">Ceny aktualizovány u %1$d karet</string>
+
+    <!-- Řazení -->
+    <string name="sort_date_added">Datum přidání</string>
+    <string name="sort_name">Název</string>
+    <string name="sort_set">Sada</string>
+    <string name="sort_value">Hodnota</string>
+
+    <!-- Hledání -->
+    <string name="search_title">Hledat v TCGdex</string>
+    <string name="search_hint">Název karty</string>
+    <string name="search_recent">Nedávná hledání</string>
+    <string name="search_failed">Vyhledávání se nepodařilo</string>
+
+    <!-- Detail karty -->
+    <string name="card_detail_title">Karta</string>
+    <string name="cd_back">Zpět</string>
+    <string name="loading">Načítání…</string>
+    <string name="error_generic">Chyba</string>
+    <string name="refresh_price">Obnovit cenu</string>
+    <string name="in_collection_qty">Ve sbírce: množství %1$d</string>
+    <string name="add_to_collection">Přidat do sbírky</string>
+    <string name="quick_save_qty_one">Rychle uložit (množství 1)</string>
+    <string name="edit_in_collection">Upravit ve sbírce</string>
+
+    <!-- Úprava položky -->
+    <string name="collection_entry_title">Položka ve sbírce</string>
+    <string name="field_quantity">Množství</string>
+    <string name="field_condition">Stav: %1$s</string>
+    <string name="field_language">Jazyk</string>
+    <string name="field_notes">Poznámky</string>
+    <string name="field_purchase_price">Kupní cena (EUR)</string>
+    <string name="action_save">Uložit</string>
+
+    <!-- Stavy karty -->
+    <string name="condition_nm">Téměř bezchybná (NM)</string>
+    <string name="condition_lp">Lehce hraná (LP)</string>
+    <string name="condition_mp">Středně hraná (MP)</string>
+    <string name="condition_hp">Silně hraná (HP)</string>
+    <string name="condition_dmg">Poškozená (DMG)</string>
+
+    <!-- Ceny -->
+    <string name="price_est_eur">Odhad EUR: %1$s</string>
+    <string name="price_no_data"> (bez cenových dat)</string>
+    <string name="price_cached_stale"> (z mezipaměti / může být zastaralé)</string>
+    <string name="price_updated">Aktualizováno %1$s</string>
+    <string name="price_dash">—</string>
+
+    <!-- Nastavení -->
+    <string name="settings_currency">Zobrazená měna: EUR (Cardmarket)</string>
+    <string name="settings_dark_theme">Tmavý vzhled</string>
+    <string name="settings_clear_cache">Vymazat mezipaměť katalogu a hledání</string>
+    <string name="disclaimer_prices">Ceny jsou odhady z tržišť třetích stran (Cardmarket EUR). Nejedná se o investiční poradenství.</string>
+    <string name="disclaimer_authenticity">Procento pravosti po skenu je pouze počítačový odhad z OCR a shody v katalogu. Neověřuje originál ani stav karty a nenahrazuje profesionální grading (PSA, CGC, Beckett).</string>
+    <string name="disclaimer_fan">Fanouškovská aplikace; není spojena se společností The Pokémon Company, Nintendo ani Creatures.</string>
+    <string name="attribution_tcgdex">Data karet © přispěvatelé TCGdex. https://tcgdex.dev/</string>
+
+    <!-- Sken -->
+    <string name="scan_title">Sken karty</string>
+    <string name="scan_capture">Vyfotit a rozpoznat</string>
+    <string name="scan_grant_permission">Povolit fotoaparát</string>
+    <string name="scan_disclaimer">Rozpoznání textu je orientační — neověřuje pravost karty.</string>
+    <string name="scan_query_used">Hledám podle: %1$s</string>
+    <string name="scan_number_hint">Detekované číslo karty: %1$s</string>
+    <string name="scan_error_no_permission">Bez přístupu k fotoaparátu nelze skenovat. Povolte oprávnění v nastavení.</string>
+    <string name="scan_error_no_text">Na fotografii nebyl rozpoznán použitelný text. Zkuste lepší světlo a ostřejší záběr.</string>
+    <string name="scan_error_no_match">V katalogu TCGdex nebyla nalezena shoda. Vyberte kartu ručně v Hledat.</string>
+    <string name="scan_error_offline">Vyhledání vyžaduje síť. Sbírku lze prohlížet offline, sken katalogu ne.</string>
+    <string name="scan_error_recognition">Rozpoznání textu se nepodařilo. Zkuste to znovu.</string>
+
+    <!-- Výsledek skenu -->
+    <string name="scan_result_title">Výsledek skenu</string>
+    <string name="scan_result_loading">Rozpoznávám text, hledám v TCGdex a počítám odhad…</string>
+    <string name="scan_result_save">Uložit</string>
+    <string name="scan_result_discard">Zahodit</string>
+    <string name="scan_result_saved">Karta uložena do sbírky (1× NM).</string>
+    <string name="scan_result_back_to_scan">Zpět ke skenu</string>
+    <string name="scan_result_missing_file">Dočasný snímek chybí. Vyfotte kartu znovu.</string>
+    <string name="scan_result_cache_partial">Některá data jsou z mezipaměti — ceny mohou být zastaralé.</string>
+    <string name="scan_result_card_number">Číslo: %1$s</string>
+    <string name="scan_result_authenticity">Odhad pravosti: %1$d %%</string>
+    <string name="scan_result_authenticity_subtitle">Orientační, ne certifikace — nenahrazuje grading (PSA, CGC atd.).</string>
+
+    <!-- Vodoznak -->
+    <string name="watermark_cd">Dekorativní vodoznak Pikachu</string>
+    <string name="logo_cd">Pokémon</string>
+    <string name="attribution_logo_commons">Logo Pokémon: Wikimedia Commons (International Pokémon logo). Pokémon je ochranná známka společností Nintendo / Creatures / Game Freak / The Pokémon Company. Fanouškovská aplikace bez vazby na držitele značky.</string>
+</resources>
