@@ -27,7 +27,11 @@ class AppViewModelFactory(
         modelClass.isAssignableFrom(SearchViewModel::class.java) ->
             SearchViewModel(container.catalogRepository) as T
         modelClass.isAssignableFrom(SettingsViewModel::class.java) ->
-            SettingsViewModel(container.settingsRepository, container.catalogRepository) as T
+            SettingsViewModel(
+                container.settingsRepository,
+                container.catalogRepository,
+                container.updateChecker,
+            ) as T
         modelClass.isAssignableFrom(CardDetailViewModel::class.java) ->
             CardDetailViewModel(
                 container.catalogRepository,

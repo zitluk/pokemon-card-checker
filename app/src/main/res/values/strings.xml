@@ -71,6 +71,15 @@
     <string name="settings_currency">Zobrazená měna: EUR (Cardmarket)</string>
     <string name="settings_dark_theme">Tmavý vzhled</string>
     <string name="settings_clear_cache">Vymazat mezipaměť katalogu a hledání</string>
+    <string name="settings_app_version">Verze aplikace: %1$s</string>
+    <string name="settings_check_updates">Kontrola aktualizace</string>
+    <string name="settings_update_loading">Kontroluji aktualizace…</string>
+    <string name="settings_update_up_to_date">Aktuální verze</string>
+    <string name="settings_update_available">Dostupná aktualizace: %1$s</string>
+    <string name="settings_update_open_github">Otevřít na GitHubu</string>
+    <string name="settings_update_error_offline">Kontrola aktualizace vyžaduje připojení k internetu.</string>
+    <string name="settings_update_error_no_releases">Zatím není publikováno žádné vydání na GitHubu.</string>
+    <string name="settings_update_error_generic">Kontrolu aktualizace se nepodařilo dokončit.</string>
     <string name="disclaimer_prices">Ceny jsou odhady z tržišť třetích stran (Cardmarket EUR). Nejedná se o investiční poradenství.</string>
     <string name="disclaimer_authenticity">Procento pravosti po skenu je pouze počítačový odhad z OCR a shody v katalogu. Neověřuje originál ani stav karty a nenahrazuje profesionální grading (PSA, CGC, Beckett).</string>
     <string name="disclaimer_fan">Fanouškovská aplikace; není spojena se společností The Pokémon Company, Nintendo ani Creatures.</string>

@@ -9,6 +9,7 @@ import com.pokemontcg.collection.data.repository.CatalogRepository
 import com.pokemontcg.collection.data.repository.CollectionRepository
 import com.pokemontcg.collection.data.repository.PricingRepository
 import com.pokemontcg.collection.data.repository.SettingsRepository
+import com.pokemontcg.collection.data.update.UpdateChecker
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
@@ -58,4 +59,5 @@ class AppContainer(context: Context) {
     val catalogRepository = CatalogRepository(api, database.cardCacheDao(), database.searchHistoryDao())
     val pricingRepository = PricingRepository(database.cardCacheDao(), catalogRepository)
     val settingsRepository = SettingsRepository(context)
+    val updateChecker = UpdateChecker(okHttp)
 }
