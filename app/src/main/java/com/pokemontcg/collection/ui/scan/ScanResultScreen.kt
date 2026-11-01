@@ -142,11 +142,18 @@ fun ScanResultScreen(
                         }
                         state.error != null -> {
                             ResponsiveContentColumn(metrics) {
+                            Text(
+                                scanResultErrorMessage(state.error!!),
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(vertical = metrics.verticalSpacing),
+                            )
+                            if (state.error == ScanResultError.NO_MATCH) {
                                 Text(
-                                    scanResultErrorMessage(state.error!!),
-                                    color = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.padding(vertical = metrics.verticalSpacing),
+                                    stringResource(R.string.scan_error_no_match_detail),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TcgColors.OnPlaymatMuted,
                                 )
+                            }
                                 state.ocrPreview?.let {
                                     Text(
                                         it,

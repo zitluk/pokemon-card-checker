@@ -13,8 +13,9 @@ import com.pokemontcg.collection.data.scan.AuthenticityEstimator
 import com.pokemontcg.collection.data.scan.CardMatchScorer
 import com.pokemontcg.collection.data.scan.CardScanRecognizer
 import com.pokemontcg.collection.data.scan.ScanCaptureStorage
+import com.pokemontcg.collection.data.scan.ScanImagePreprocessor
 import com.pokemontcg.collection.data.scan.ScanQueryExtractor
-import com.google.mlkit.vision.common.InputImage
+import com.pokemontcg.collection.data.scan.ScanSearchPipeline
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -70,45 +71,36 @@ class ScanResultViewModel(
                 BitmapFactory.decodeFile(capturePath, bounds)
                 val aspectScore = AuthenticityEstimator.aspectRatioScore(bounds.outWidth, bounds.outHeight)
 
-                val inputImage = InputImage.fromFilePath(getApplication(), Uri.fromFile(file))
+                val inputImage = ScanImagePreprocessor.inputImageForOcr(getApplication(), file)
                 val ocr = recognizer.recognizeDetailed(inputImage)
                 val extraction = ScanQueryExtractor.extract(ocr.fullText)
-                if (extraction.searchQueries.isEmpty()) {
+                if (extraction.searchQueries.isEmpty() && extraction.fallbackTokens.isEmpty()) {
                     _uiState.value = ScanResultUiState(
                         isLoading = false,
                         error = ScanResultError.NO_TEXT,
-                        ocrPreview = extraction.rawPreview.ifBlank { null },
+                        ocrPreview = ocrPreviewFor(extraction, ocr.fullText),
                     )
                     return@launch
                 }
 
-                var found = emptyList<com.pokemontcg.collection.data.remote.CardBriefDto>()
-                var queryUsed: String? = null
-                for (query in extraction.searchQueries) {
-                    val result = catalogRepository.searchCards(query)
-                    result.onSuccess { cards ->
-                        if (cards.isNotEmpty()) {
-                            found = cards
-                            queryUsed = query
-                        }
-                    }.onFailure { e ->
-                        if (e is IOException) {
-                            _uiState.value = ScanResultUiState(
-                                isLoading = false,
-                                error = ScanResultError.OFFLINE,
-                                ocrPreview = extraction.rawPreview.ifBlank { null },
-                            )
-                            return@launch
-                        }
-                    }
-                    if (found.isNotEmpty()) break
+                val searchOutcome = ScanSearchPipeline.searchCatalog(catalogRepository, extraction)
+                if (searchOutcome.networkFailed) {
+                    _uiState.value = ScanResultUiState(
+                        isLoading = false,
+                        error = ScanResultError.OFFLINE,
+                        ocrPreview = ocrPreviewFor(extraction, ocr.fullText),
+                    )
+                    return@launch
                 }
+
+                val found = searchOutcome.cards
+                val queryUsed = searchOutcome.queryUsed
 
                 if (found.isEmpty()) {
                     _uiState.value = ScanResultUiState(
                         isLoading = false,
                         error = ScanResultError.NO_MATCH,
-                        ocrPreview = extraction.rawPreview.ifBlank { null },
+                        ocrPreview = ocrPreviewFor(extraction, ocr.fullText),
                     )
                     return@launch
                 }
@@ -137,13 +129,20 @@ class ScanResultViewModel(
                     card = card,
                     authenticityScore = authenticity,
                     usedQuery = queryUsed,
-                    ocrPreview = extraction.rawPreview.ifBlank { null },
+                    ocrPreview = ocrPreviewFor(extraction, ocr.fullText),
                     fromCacheOnly = fromCacheOnly || summary.isPriceStale,
                 )
             } catch (_: Exception) {
                 _uiState.value = ScanResultUiState(isLoading = false, error = ScanResultError.RECOGNITION_FAILED)
             }
         }
+    }
+
+    private fun ocrPreviewFor(extraction: com.pokemontcg.collection.data.scan.ScanExtraction, fullText: String): String? {
+        val preview = extraction.rawPreview.ifBlank {
+            fullText.lines().map { it.trim() }.filter { it.length >= 2 }.take(4).joinToString(" · ")
+        }
+        return preview.ifBlank { null }
     }
 
     fun saveToCollection() {

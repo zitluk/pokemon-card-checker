@@ -9,6 +9,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -56,7 +58,13 @@ fun ScanScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    val imageCapture = remember { ImageCapture.Builder().build() }
+    val zoomController = remember { ScanZoomController() }
+    val imageCapture = remember {
+        ImageCapture.Builder()
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+            .setJpegQuality(95)
+            .build()
+    }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -147,7 +155,26 @@ fun ScanScreen(
                                 CameraPreview(
                                     modifier = Modifier.fillMaxSize(),
                                     imageCapture = imageCapture,
+                                    zoomController = zoomController,
                                 )
+                                Row(
+                                    Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Text(
+                                        stringResource(
+                                            R.string.scan_zoom_level,
+                                            (zoomController.displayRatio * 100).toInt(),
+                                        ),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = TcgColors.FrameGoldBright,
+                                    )
+                                    TextButton(onClick = { zoomController.resetZoom() }) {
+                                        Text(stringResource(R.string.scan_zoom_reset))
+                                    }
+                                }
                             }
                             Button(
                                 onClick = {

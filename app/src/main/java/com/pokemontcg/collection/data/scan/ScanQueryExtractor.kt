@@ -4,6 +4,7 @@ data class ScanExtraction(
     val searchQueries: List<String>,
     val cardNumberHint: String?,
     val rawPreview: String,
+    val fallbackTokens: List<String> = emptyList(),
 )
 
 object ScanQueryExtractor {
@@ -40,20 +41,59 @@ object ScanQueryExtractor {
         }
 
         extractCapitalizedRuns(blob).forEach { queries.add(it) }
+        extractAllCapsNames(blob).forEach { queries.add(it) }
+
+        for (line in lines) {
+            if (line.any { it.isLetter() }) {
+                queries.add(normalizeNameForSearch(line))
+            }
+        }
+
+        val fallbackTokens = extractFallbackTokens(blob)
 
         val ranked = queries
             .map { it.trim() }
-            .filter { it.length in 3..40 }
+            .filter { it.length in 2..40 }
             .distinctBy { it.lowercase() }
             .sortedByDescending { it.length }
-            .take(6)
+            .take(10)
 
         return ScanExtraction(
             searchQueries = ranked,
             cardNumberHint = cardNumber,
             rawPreview = lines.take(8).joinToString(" · "),
+            fallbackTokens = fallbackTokens,
         )
     }
+
+    private fun normalizeNameForSearch(line: String): String =
+        line.trim()
+            .split(Regex("""\s+"""))
+            .filter { it.isNotBlank() }
+            .joinToString(" ") { word ->
+                word.lowercase().replaceFirstChar { ch -> ch.titlecase() }
+            }
+
+    private fun extractAllCapsNames(text: String): List<String> {
+        val pattern = Regex("""\b[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ0-9'\-]{2,}(?:\s+[A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ0-9'\-]{2,}){0,3}\b""")
+        return pattern.findAll(text)
+            .map { normalizeNameForSearch(it.value) }
+            .filter { isLikelyName(it) }
+            .toList()
+    }
+
+    private fun extractFallbackTokens(blob: String): List<String> =
+        blob.split(Regex("""\s+"""))
+            .map { it.trim().trim('"', '\'', '.', ',') }
+            .filter { token ->
+                token.length in 4..24 &&
+                    token.any { it.isLetter() } &&
+                    !token.equals("pokemon", ignoreCase = true) &&
+                    !cardNumberPattern.matches(token)
+            }
+            .map { normalizeNameForSearch(it) }
+            .distinct()
+            .take(8)
 
     private fun cleanLine(raw: String): String =
         raw.trim()

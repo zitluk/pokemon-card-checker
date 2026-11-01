@@ -30,10 +30,20 @@ class CatalogRepository(
     suspend fun searchCards(query: String): Result<List<CardBriefDto>> {
         val trimmed = query.trim()
         if (trimmed.length < 2) return Result.success(emptyList())
-        return try {
-            val results = api.searchCards(trimmed)
+        val primary = executeSearch(trimmed)
+        if (primary.isSuccess && primary.getOrNull().orEmpty().isNotEmpty()) return primary
+        if (trimmed.length >= 3 && !trimmed.startsWith("like:", ignoreCase = true)) {
+            val fuzzy = executeSearch("like:$trimmed")
+            if (fuzzy.isSuccess && fuzzy.getOrNull().orEmpty().isNotEmpty()) return fuzzy
+        }
+        return primary
+    }
+
+    private suspend fun executeSearch(query: String): Result<List<CardBriefDto>> =
+        try {
+            val results = api.searchCards(query)
             searchHistoryDao.insert(
-                SearchHistoryEntity(query = trimmed, searchedAt = System.currentTimeMillis()),
+                SearchHistoryEntity(query = query, searchedAt = System.currentTimeMillis()),
             )
             Result.success(results)
         } catch (e: IOException) {
@@ -41,7 +51,6 @@ class CatalogRepository(
         } catch (e: HttpException) {
             Result.failure(e)
         }
-    }
 
     suspend fun getCardDetail(cardId: String, forceRefresh: Boolean = false): Result<CardSummary> {
         val cached = cardCacheDao.get(cardId)

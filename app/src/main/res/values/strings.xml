@@ -88,6 +88,9 @@
     <!-- Sken -->
     <string name="scan_title">Sken karty</string>
     <string name="scan_capture">Vyfotit a rozpoznat</string>
+    <string name="scan_zoom_level">Zoom %1$d %%</string>
+    <string name="scan_zoom_reset">Obnovit</string>
+    <string name="scan_error_no_match_detail">V TCGdex nebyla nalezena shoda. Zkuste ostřejší záběr názvu karty nebo vyhledejte v poli nahoře ve sbírce.</string>
     <string name="scan_grant_permission">Povolit fotoaparát</string>
     <string name="scan_disclaimer">Rozpoznání textu je orientační — neověřuje pravost karty.</string>
     <string name="scan_query_used">Hledám podle: %1$s</string>
