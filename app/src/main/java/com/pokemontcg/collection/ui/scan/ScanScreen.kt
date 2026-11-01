@@ -8,10 +8,8 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -37,12 +35,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.pokemontcg.collection.R
 import com.pokemontcg.collection.data.scan.ScanCaptureStorage
-import com.pokemontcg.collection.ui.components.PokemonBrandHeader
 import com.pokemontcg.collection.ui.components.WatermarkedScreen
 import com.pokemontcg.collection.ui.layout.ResponsiveScreenScope
 import com.pokemontcg.collection.ui.layout.rememberResponsiveMetrics
@@ -108,56 +104,46 @@ fun ScanScreen(
                 colors = TcgChrome.topAppBarColors(),
             )
         },
-    ) { snackPadding ->
+    ) { innerPadding ->
         WatermarkedScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
-                .padding(snackPadding),
-            header = {
-                BoxWithConstraints(Modifier.fillMaxWidth()) {
-                    val pad = (maxWidth.value * 0.04f).dp.coerceIn(12.dp, 28.dp)
-                    PokemonBrandHeader(
-                        screenTitle = stringResource(R.string.scan_title),
-                        horizontalPadding = pad,
-                    )
-                }
-            },
+                .padding(innerPadding),
+            header = null,
         ) {
             ResponsiveScreenScope {
                 val metrics = rememberResponsiveMetrics()
-                Column(Modifier.fillMaxSize()) {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = metrics.horizontalPadding)
+                        .padding(bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
                     Text(
                         stringResource(R.string.scan_disclaimer),
-                        modifier = Modifier.padding(horizontal = metrics.horizontalPadding),
                         style = MaterialTheme.typography.bodySmall,
                         color = TcgColors.OnPlaymatMuted,
                     )
 
                     when {
                         !state.hasCameraPermission -> {
-                            Column(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(metrics.horizontalPadding),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                            ) {
-                                Text(
-                                    stringResource(R.string.scan_error_no_permission),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                                Button(
-                                    onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
-                                    colors = TcgChrome.primaryButtonColors(),
-                                ) { Text(stringResource(R.string.scan_grant_permission)) }
-                            }
+                            Text(
+                                stringResource(R.string.scan_error_no_permission),
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                            Button(
+                                onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = TcgChrome.primaryButtonColors(),
+                            ) { Text(stringResource(R.string.scan_grant_permission)) }
                         }
                         else -> {
                             Box(
                                 Modifier
-                                    .fillMaxWidth()
-                                    .padding(metrics.horizontalPadding)
-                                    .aspectRatio(3f / 4f),
+                                    .weight(1f)
+                                    .fillMaxWidth(),
                             ) {
                                 CameraPreview(
                                     modifier = Modifier.fillMaxSize(),
@@ -174,17 +160,14 @@ fun ScanScreen(
                                     )
                                 },
                                 enabled = !state.isCapturing,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = metrics.horizontalPadding),
+                                modifier = Modifier.fillMaxWidth(),
                                 colors = TcgChrome.primaryButtonColors(),
-                            ) { Text(stringResource(R.string.scan_capture)) }
-
+                            ) {
+                                Text(stringResource(R.string.scan_capture))
+                            }
                             if (state.isCapturing) {
                                 Box(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .padding(metrics.horizontalPadding),
+                                    Modifier.fillMaxWidth(),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     CircularProgressIndicator(color = TcgColors.FrameGoldBright)
