@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import java.util.concurrent.atomic.AtomicReference
 
 private const val TAG = "ScanCamera"
 
@@ -29,6 +30,7 @@ fun CameraPreview(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val previewView = remember { PreviewView(context) }
+    val boundCamera = remember { AtomicReference<Camera?>(null) }
 
     DisposableEffect(lifecycleOwner, imageCapture) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
@@ -45,20 +47,35 @@ fun CameraPreview(
                     preview,
                     imageCapture,
                 )
+                boundCamera.set(camera)
                 val zoomState = camera.cameraInfo.zoomState.value
                 zoomController.minZoomRatio = zoomState?.minZoomRatio ?: 1f
                 zoomController.maxZoomRatio = zoomState?.maxZoomRatio ?: 1f
+                zoomController.cameraBound = true
+                zoomController.hasFlashUnit = camera.cameraInfo.hasFlashUnit()
                 zoomController.applyLinearZoom = { linear ->
                     camera.cameraControl.setLinearZoom(linear)
                 }
+                zoomController.applyTorch = { enabled ->
+                    if (camera.cameraInfo.hasFlashUnit()) {
+                        camera.cameraControl.enableTorch(enabled)
+                    }
+                }
                 camera.cameraControl.setLinearZoom(zoomController.linearZoom)
+                if (zoomController.torchEnabled && camera.cameraInfo.hasFlashUnit()) {
+                    camera.cameraControl.enableTorch(true)
+                } else {
+                    zoomController.setTorch(false)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Camera bind failed", e)
             }
         }
         cameraProviderFuture.addListener(listener, ContextCompat.getMainExecutor(context))
         onDispose {
-            zoomController.applyLinearZoom = null
+            runCatching { boundCamera.get()?.cameraControl?.enableTorch(false) }
+            boundCamera.set(null)
+            zoomController.releaseCameraSession()
             runCatching { cameraProviderFuture.get().unbindAll() }
         }
     }

@@ -3,7 +3,6 @@ package com.pokemontcg.collection.data.repository
 import com.pokemontcg.collection.data.local.CardCacheDao
 import com.pokemontcg.collection.data.local.CardCacheEntity
 import com.pokemontcg.collection.data.local.SearchHistoryDao
-import com.pokemontcg.collection.data.local.SearchHistoryEntity
 import com.pokemontcg.collection.data.model.CardSummary
 import com.pokemontcg.collection.data.remote.CardBriefDto
 import com.pokemontcg.collection.data.remote.CardDetailDto
@@ -11,7 +10,6 @@ import com.pokemontcg.collection.data.remote.CardmarketPricingDto
 import com.pokemontcg.collection.data.remote.TcgDexApi
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import kotlinx.coroutines.flow.Flow
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -24,28 +22,51 @@ class CatalogRepository(
     private val detailAdapter = moshi.adapter(CardDetailDto::class.java)
     private val pricingAdapter = moshi.adapter(CardmarketPricingDto::class.java)
 
-    fun observeRecentSearches(): Flow<List<SearchHistoryEntity>> =
-        searchHistoryDao.observeRecent()
-
     suspend fun searchCards(query: String): Result<List<CardBriefDto>> {
         val trimmed = query.trim()
         if (trimmed.length < 2) return Result.success(emptyList())
-        val primary = executeSearch(trimmed)
+        val primary = executeNameSearch(trimmed)
         if (primary.isSuccess && primary.getOrNull().orEmpty().isNotEmpty()) return primary
         if (trimmed.length >= 3 && !trimmed.startsWith("like:", ignoreCase = true)) {
-            val fuzzy = executeSearch("like:$trimmed")
+            val fuzzy = executeNameSearch("like:$trimmed")
             if (fuzzy.isSuccess && fuzzy.getOrNull().orEmpty().isNotEmpty()) return fuzzy
         }
         return primary
     }
 
-    private suspend fun executeSearch(query: String): Result<List<CardBriefDto>> =
+    suspend fun searchByLocalId(localId: String, setId: String? = null): Result<List<CardBriefDto>> =
+        executeQuery {
+            api.queryCards(name = null, localId = localId, setId = setId)
+        }
+
+    suspend fun searchByNameAndSet(name: String, setId: String): Result<List<CardBriefDto>> =
+        executeQuery {
+            api.queryCards(name = name, localId = null, setId = setId)
+        }
+
+    suspend fun fetchCardBriefById(cardId: String): Result<CardBriefDto?> =
         try {
-            val results = api.searchCards(query)
-            searchHistoryDao.insert(
-                SearchHistoryEntity(query = query, searchedAt = System.currentTimeMillis()),
+            val detail = api.getCard(cardId)
+            Result.success(
+                CardBriefDto(
+                    id = detail.id,
+                    name = detail.name,
+                    image = detail.image,
+                    localId = detail.localId,
+                ),
             )
-            Result.success(results)
+        } catch (e: IOException) {
+            Result.failure(e)
+        } catch (e: HttpException) {
+            if (e.code() == 404) Result.success(null) else Result.failure(e)
+        }
+
+    private suspend fun executeNameSearch(query: String): Result<List<CardBriefDto>> =
+        executeQuery { api.searchCards(query) }
+
+    private suspend fun executeQuery(block: suspend () -> List<CardBriefDto>): Result<List<CardBriefDto>> =
+        try {
+            Result.success(block())
         } catch (e: IOException) {
             Result.failure(e)
         } catch (e: HttpException) {

@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.FlashOff
+import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,6 +31,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -66,6 +69,9 @@ fun ScanScreen(
             .build()
     }
     val snackbarHostState = remember { SnackbarHostState() }
+    DisposableEffect(zoomController) {
+        onDispose { zoomController.setTorch(false) }
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -107,6 +113,23 @@ fun ScanScreen(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.cd_back),
                         )
+                    }
+                },
+                actions = {
+                    if (state.hasCameraPermission && zoomController.cameraBound && zoomController.hasFlashUnit) {
+                        IconButton(onClick = { zoomController.toggleTorch() }) {
+                            if (zoomController.torchEnabled) {
+                                Icon(
+                                    Icons.Filled.FlashOff,
+                                    contentDescription = stringResource(R.string.scan_torch_off),
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Filled.FlashOn,
+                                    contentDescription = stringResource(R.string.scan_torch_on),
+                                )
+                            }
+                        }
                     }
                 },
                 colors = TcgChrome.topAppBarColors(),

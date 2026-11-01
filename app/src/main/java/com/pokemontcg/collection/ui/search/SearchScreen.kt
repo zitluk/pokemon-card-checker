@@ -1,6 +1,5 @@
 package com.pokemontcg.collection.ui.search
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -43,7 +42,6 @@ fun SearchScreen(
     onCardClick: (String) -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
-    val recent by viewModel.recentSearches.collectAsState()
     val fieldColors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = TcgColors.FrameGoldBright,
         unfocusedBorderColor = TcgColors.FrameGold.copy(alpha = 0.5f),
@@ -89,27 +87,6 @@ fun SearchScreen(
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(horizontal = metrics.horizontalPadding),
                     )
-                }
-                if (state.results.isEmpty() && recent.isNotEmpty()) {
-                    Text(
-                        stringResource(R.string.search_recent),
-                        modifier = Modifier.padding(metrics.horizontalPadding),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = TcgColors.FrameGoldBright,
-                    )
-                    recent.forEach { entry ->
-                        Text(
-                            entry.query,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { viewModel.onQueryChange(entry.query) }
-                                .padding(
-                                    horizontal = metrics.horizontalPadding,
-                                    vertical = metrics.verticalSpacing / 2,
-                                ),
-                        )
-                    }
                 }
                 LazyVerticalGrid(
                     columns = responsiveGridCells(metrics),

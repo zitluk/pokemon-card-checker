@@ -1,6 +1,5 @@
 package com.pokemontcg.collection.ui.search
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,7 +36,6 @@ fun CatalogSearchPanel(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
-    val recent by viewModel.recentSearches.collectAsState()
     val fieldColors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = TcgColors.FrameGoldBright,
         unfocusedBorderColor = TcgColors.FrameGold.copy(alpha = 0.5f),
@@ -72,27 +70,6 @@ fun CatalogSearchPanel(
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(horizontal = metrics.horizontalPadding),
             )
-        }
-        if (!showResults && recent.isNotEmpty()) {
-            Text(
-                stringResource(R.string.search_recent),
-                modifier = Modifier.padding(horizontal = metrics.horizontalPadding),
-                style = MaterialTheme.typography.titleSmall,
-                color = TcgColors.FrameGoldBright,
-            )
-            recent.take(5).forEach { entry ->
-                Text(
-                    entry.query,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { viewModel.onQueryChange(entry.query) }
-                        .padding(
-                            horizontal = metrics.horizontalPadding,
-                            vertical = metrics.verticalSpacing / 2,
-                        ),
-                )
-            }
         }
         if (showResults && state.results.isNotEmpty()) {
             Text(

@@ -30,7 +30,6 @@
     <!-- Hledání -->
     <string name="search_title">Hledat v TCGdex</string>
     <string name="search_hint">Název karty</string>
-    <string name="search_recent">Nedávná hledání</string>
     <string name="search_failed">Vyhledávání se nepodařilo</string>
 
     <!-- Detail karty -->
@@ -70,7 +69,7 @@
     <!-- Nastavení -->
     <string name="settings_currency">Zobrazená měna: EUR (Cardmarket)</string>
     <string name="settings_dark_theme">Tmavý vzhled</string>
-    <string name="settings_clear_cache">Vymazat mezipaměť katalogu a hledání</string>
+    <string name="settings_clear_cache">Vymazat mezipaměť katalogu</string>
     <string name="settings_app_version">Verze aplikace: %1$s</string>
     <string name="settings_check_updates">Kontrola aktualizace</string>
     <string name="settings_update_loading">Kontroluji aktualizace…</string>
@@ -90,6 +89,9 @@
     <string name="scan_capture">Vyfotit a rozpoznat</string>
     <string name="scan_zoom_level">Zoom %1$d %%</string>
     <string name="scan_zoom_reset">Obnovit</string>
+    <string name="scan_torch_on">Zapnout svítilnu</string>
+    <string name="scan_torch_off">Vypnout svítilnu</string>
+    <string name="scan_torch_unavailable">Toto zařízení nemá blesk.</string>
     <string name="scan_error_no_match_detail">V TCGdex nebyla nalezena shoda. Zkuste ostřejší záběr názvu karty nebo vyhledejte v poli nahoře ve sbírce.</string>
     <string name="scan_grant_permission">Povolit fotoaparát</string>
     <string name="scan_disclaimer">Rozpoznání textu je orientační — neověřuje pravost karty.</string>
@@ -100,6 +102,8 @@
     <string name="scan_error_no_match">V katalogu TCGdex nebyla nalezena shoda. Vyberte kartu ručně v Hledat.</string>
     <string name="scan_error_offline">Vyhledání vyžaduje síť. Sbírku lze prohlížet offline, sken katalogu ne.</string>
     <string name="scan_error_recognition">Rozpoznání textu se nepodařilo. Zkuste to znovu.</string>
+    <string name="scan_error_card_back">Otočte kartu lícem nahoru — zadní strana se nerozpozná.</string>
+    <string name="scan_queries_tried">Zkoušeno: %1$s</string>
 
     <!-- Výsledek skenu -->
     <string name="scan_result_title">Výsledek skenu</string>

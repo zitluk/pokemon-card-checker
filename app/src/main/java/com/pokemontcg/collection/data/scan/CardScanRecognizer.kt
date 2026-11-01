@@ -14,6 +14,28 @@ class CardScanRecognizer(context: Context) {
     suspend fun recognizeText(inputImage: InputImage): String =
         recognizeDetailed(inputImage).fullText
 
+    suspend fun recognizeMergedFromBitmaps(bitmaps: List<android.graphics.Bitmap>): OcrScanResult {
+        if (bitmaps.isEmpty()) {
+            return OcrScanResult(fullText = "", blockCount = 0, lineCount = 0, avgConfidence = null)
+        }
+        val parts = mutableListOf<OcrScanResult>()
+        for (bitmap in bitmaps) {
+            parts.add(recognizeDetailed(InputImage.fromBitmap(bitmap, 0)))
+        }
+        val mergedText = parts
+            .map { it.fullText.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .joinToString("\n")
+        val confidences = parts.mapNotNull { it.avgConfidence }
+        return OcrScanResult(
+            fullText = mergedText,
+            blockCount = parts.sumOf { it.blockCount },
+            lineCount = parts.sumOf { it.lineCount },
+            avgConfidence = confidences.takeIf { it.isNotEmpty() }?.average()?.toFloat(),
+        )
+    }
+
     suspend fun recognizeDetailed(inputImage: InputImage): OcrScanResult =
         suspendCancellableCoroutine { cont ->
             recognizer.process(inputImage)

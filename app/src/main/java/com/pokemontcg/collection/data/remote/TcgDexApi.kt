@@ -10,6 +10,13 @@ interface TcgDexApi {
     @GET("en/cards")
     suspend fun searchCards(@Query("name") name: String): List<CardBriefDto>
 
+    @GET("en/cards")
+    suspend fun queryCards(
+        @Query("name") name: String? = null,
+        @Query("localId") localId: String? = null,
+        @Query("set.id") setId: String? = null,
+    ): List<CardBriefDto>
+
     @GET("en/cards/{id}")
     suspend fun getCard(@Path("id") id: String): CardDetailDto
 }

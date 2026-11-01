@@ -154,6 +154,16 @@ fun ScanResultScreen(
                                     color = TcgColors.OnPlaymatMuted,
                                 )
                             }
+                            if (state.error == ScanResultError.NO_MATCH && state.queriesTried.isNotEmpty()) {
+                                Text(
+                                    stringResource(
+                                        R.string.scan_queries_tried,
+                                        state.queriesTried.take(5).joinToString(", "),
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TcgColors.OnPlaymatMuted,
+                                )
+                            }
                                 state.ocrPreview?.let {
                                     Text(
                                         it,
@@ -255,4 +265,5 @@ private fun scanResultErrorMessage(error: ScanResultError): String = when (error
     ScanResultError.OFFLINE -> stringResource(R.string.scan_error_offline)
     ScanResultError.RECOGNITION_FAILED -> stringResource(R.string.scan_error_recognition)
     ScanResultError.MISSING_FILE -> stringResource(R.string.scan_result_missing_file)
+    ScanResultError.CARD_BACK -> stringResource(R.string.scan_error_card_back)
 }

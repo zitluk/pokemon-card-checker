@@ -2,9 +2,13 @@ package com.pokemontcg.collection.data.scan
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.net.Uri
 import android.graphics.BitmapFactory
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Matrix
+import android.graphics.Paint
+import android.graphics.Canvas
+import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
 import com.google.mlkit.vision.common.InputImage
 import java.io.File
@@ -15,14 +19,57 @@ object ScanImagePreprocessor {
     private const val MIN_OCR_WIDTH_PX = 1280
 
     fun inputImageForOcr(context: Context, file: File): InputImage {
+        val bitmap = loadOrientedBitmap(file)
+            ?: return InputImage.fromFilePath(context, Uri.fromFile(file))
+        return InputImage.fromBitmap(enhanceForOcr(bitmap), 0)
+    }
+
+    fun ocrPassBitmaps(file: File): List<Bitmap> {
+        val base = loadOrientedBitmap(file) ?: return emptyList()
+        val enhanced = enhanceForOcr(base)
+        val passes = mutableListOf(enhanced)
+        cropNameBand(enhanced)?.let { passes.add(enhanceForOcr(it)) }
+        cropNumberBand(enhanced)?.let { passes.add(enhanceForOcr(it)) }
+        return passes.distinctBy { it.width to it.height }
+    }
+
+    private fun loadOrientedBitmap(file: File): Bitmap? {
         val exifRotation = readExifRotationDegrees(file)
-        val decoded = decodeScaledBitmap(file) ?: return InputImage.fromFilePath(context, Uri.fromFile(file))
-        val bitmap = if (exifRotation != 0) {
+        val decoded = decodeScaledBitmap(file) ?: return null
+        return if (exifRotation != 0) {
             rotateBitmap(decoded, exifRotation.toFloat())
         } else {
             decoded
         }
-        return InputImage.fromBitmap(bitmap, 0)
+    }
+
+    private fun cropNameBand(source: Bitmap): Bitmap? {
+        val h = (source.height * 0.38f).roundToInt().coerceAtLeast(1)
+        if (h >= source.height) return null
+        return Bitmap.createBitmap(source, 0, 0, source.width, h)
+    }
+
+    private fun cropNumberBand(source: Bitmap): Bitmap? {
+        val h = (source.height * 0.28f).roundToInt().coerceAtLeast(1)
+        val top = (source.height - h).coerceAtLeast(0)
+        if (top <= 0) return null
+        return Bitmap.createBitmap(source, 0, top, source.width, h)
+    }
+
+    fun enhanceForOcr(source: Bitmap): Bitmap {
+        val gray = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(gray)
+        val contrast = ColorMatrix(
+            floatArrayOf(
+                0.72f, 0.72f, 0.72f, 0f, -24f,
+                0.72f, 0.72f, 0.72f, 0f, -24f,
+                0.72f, 0.72f, 0.72f, 0f, -24f,
+                0f, 0f, 0f, 1f, 0f,
+            ),
+        )
+        val paint = Paint().apply { colorFilter = ColorMatrixColorFilter(contrast) }
+        canvas.drawBitmap(source, 0f, 0f, paint)
+        return gray
     }
 
     private fun readExifRotationDegrees(file: File): Int = runCatching {

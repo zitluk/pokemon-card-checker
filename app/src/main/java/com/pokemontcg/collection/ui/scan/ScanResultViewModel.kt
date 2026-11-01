@@ -2,7 +2,6 @@ package com.pokemontcg.collection.ui.scan
 
 import android.app.Application
 import android.graphics.BitmapFactory
-import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.pokemontcg.collection.data.model.CardCondition
@@ -13,6 +12,7 @@ import com.pokemontcg.collection.data.scan.AuthenticityEstimator
 import com.pokemontcg.collection.data.scan.CardMatchScorer
 import com.pokemontcg.collection.data.scan.CardScanRecognizer
 import com.pokemontcg.collection.data.scan.ScanCaptureStorage
+import com.pokemontcg.collection.data.scan.ScanCardBackDetector
 import com.pokemontcg.collection.data.scan.ScanImagePreprocessor
 import com.pokemontcg.collection.data.scan.ScanQueryExtractor
 import com.pokemontcg.collection.data.scan.ScanSearchPipeline
@@ -29,6 +29,7 @@ enum class ScanResultError {
     OFFLINE,
     RECOGNITION_FAILED,
     MISSING_FILE,
+    CARD_BACK,
 }
 
 data class ScanResultUiState(
@@ -36,6 +37,7 @@ data class ScanResultUiState(
     val card: CardSummary? = null,
     val authenticityScore: Int? = null,
     val usedQuery: String? = null,
+    val queriesTried: List<String> = emptyList(),
     val ocrPreview: String? = null,
     val error: ScanResultError? = null,
     val fromCacheOnly: Boolean = false,
@@ -71,10 +73,28 @@ class ScanResultViewModel(
                 BitmapFactory.decodeFile(capturePath, bounds)
                 val aspectScore = AuthenticityEstimator.aspectRatioScore(bounds.outWidth, bounds.outHeight)
 
-                val inputImage = ScanImagePreprocessor.inputImageForOcr(getApplication(), file)
-                val ocr = recognizer.recognizeDetailed(inputImage)
+                val ocrBitmaps = ScanImagePreprocessor.ocrPassBitmaps(file)
+                val ocr = if (ocrBitmaps.isEmpty()) {
+                    val inputImage = ScanImagePreprocessor.inputImageForOcr(getApplication(), file)
+                    recognizer.recognizeDetailed(inputImage)
+                } else {
+                    recognizer.recognizeMergedFromBitmaps(ocrBitmaps)
+                }
                 val extraction = ScanQueryExtractor.extract(ocr.fullText)
-                if (extraction.searchQueries.isEmpty() && extraction.fallbackTokens.isEmpty()) {
+
+                if (ScanCardBackDetector.isLikelyCardBack(ocr.fullText, extraction)) {
+                    _uiState.value = ScanResultUiState(
+                        isLoading = false,
+                        error = ScanResultError.CARD_BACK,
+                        ocrPreview = ocrPreviewFor(extraction, ocr.fullText),
+                    )
+                    return@launch
+                }
+
+                val hasSearchSignals = extraction.searchQueries.isNotEmpty() ||
+                    extraction.fallbackTokens.isNotEmpty() ||
+                    extraction.tcgLocalId != null
+                if (!hasSearchSignals) {
                     _uiState.value = ScanResultUiState(
                         isLoading = false,
                         error = ScanResultError.NO_TEXT,
@@ -89,6 +109,7 @@ class ScanResultViewModel(
                         isLoading = false,
                         error = ScanResultError.OFFLINE,
                         ocrPreview = ocrPreviewFor(extraction, ocr.fullText),
+                        queriesTried = searchOutcome.queriesTried,
                     )
                     return@launch
                 }
@@ -101,6 +122,7 @@ class ScanResultViewModel(
                         isLoading = false,
                         error = ScanResultError.NO_MATCH,
                         ocrPreview = ocrPreviewFor(extraction, ocr.fullText),
+                        queriesTried = searchOutcome.queriesTried,
                     )
                     return@launch
                 }

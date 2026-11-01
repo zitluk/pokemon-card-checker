@@ -1,6 +1,7 @@
 package com.pokemontcg.collection.data.scan
 
 import com.pokemontcg.collection.data.remote.CardBriefDto
+
 object CardMatchScorer {
     fun score(card: CardBriefDto, extraction: ScanExtraction, queryUsed: String?): Int {
         val nameLower = card.name.lowercase()
@@ -18,11 +19,23 @@ object CardMatchScorer {
                 tokenOverlap(nameLower, ql) >= 2 -> score += 15
             }
         }
+        extraction.tcgLocalId?.let { hint ->
+            val cardLocal = normalizeLocalId(card.localId)
+            val want = normalizeLocalId(hint)
+            if (cardLocal.isNotEmpty() && cardLocal == want) {
+                score += 35
+            }
+        }
         extraction.cardNumberHint?.let { hint ->
-            val normalizedHint = hint.replace(" ", "")
-            val local = card.localId?.replace(" ", "") ?: ""
-            if (local.isNotEmpty() && (local == normalizedHint || local.endsWith(normalizedHint))) {
+            val normalizedHint = hint.substringBefore("/").let { normalizeLocalId(it) }
+            val local = normalizeLocalId(card.localId)
+            if (local.isNotEmpty() && local == normalizedHint) {
                 score += 25
+            }
+        }
+        extraction.setHints.forEach { setId ->
+            if (card.id.startsWith("$setId-", ignoreCase = true)) {
+                score += 30
             }
         }
         if (blob.isNotBlank() && tokenOverlap(nameLower, blob) >= 1) {
@@ -40,6 +53,13 @@ object CardMatchScorer {
         return cards
             .map { it to score(it, extraction, queryUsed) }
             .maxByOrNull { it.second }
+    }
+
+    private fun normalizeLocalId(raw: String?): String {
+        if (raw.isNullOrBlank()) return ""
+        val digits = raw.trim().substringBefore("/").filter { it.isDigit() }
+        if (digits.isEmpty()) return raw.trim().lowercase()
+        return digits.trimStart('0').ifEmpty { "0" }.padStart(3, '0')
     }
 
     private fun tokenOverlap(a: String, b: String): Int {

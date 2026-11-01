@@ -2,15 +2,12 @@ package com.pokemontcg.collection.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pokemontcg.collection.data.local.SearchHistoryEntity
 import com.pokemontcg.collection.data.remote.CardBriefDto
 import com.pokemontcg.collection.data.repository.CatalogRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class SearchUiState(
@@ -18,7 +15,6 @@ data class SearchUiState(
     val results: List<CardBriefDto> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val recent: List<SearchHistoryEntity> = emptyList(),
 )
 
 class SearchViewModel(
@@ -26,9 +22,6 @@ class SearchViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState
-
-    val recentSearches = catalogRepository.observeRecentSearches()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private var debounceJob: Job? = null
 
