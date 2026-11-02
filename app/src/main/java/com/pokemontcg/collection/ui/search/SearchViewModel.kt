@@ -38,6 +38,11 @@ class SearchViewModel(
         viewModelScope.launch { search(_uiState.value.query) }
     }
 
+    fun clearQuery() {
+        debounceJob?.cancel()
+        _uiState.value = SearchUiState()
+    }
+
     private suspend fun search(query: String) {
         if (query.trim().length < 2) {
             _uiState.value = _uiState.value.copy(results = emptyList(), isLoading = false)

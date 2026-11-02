@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.zIndex
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.pokemontcg.collection.R
@@ -30,19 +29,20 @@ fun WatermarkedScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        Image(
-            painter = painterResource(R.drawable.bg_pikachu_watermark),
-            contentDescription = stringResource(R.string.watermark_cd),
-            modifier = Modifier
-                .zIndex(-1f)
-                .align(Alignment.Center)
-                .fillMaxWidth(),
-            alpha = WATERMARK_ALPHA,
-            contentScale = ContentScale.FillWidth,
-        )
         Column(Modifier.fillMaxSize()) {
             header?.invoke()
-            Box(Modifier.fillMaxSize(), content = content)
+            Box(Modifier.fillMaxSize()) {
+                Image(
+                    painter = painterResource(R.drawable.bg_pikachu_watermark),
+                    contentDescription = stringResource(R.string.watermark_cd),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth(),
+                    alpha = WATERMARK_ALPHA,
+                    contentScale = ContentScale.FillWidth,
+                )
+                Box(Modifier.fillMaxSize(), content = content)
+            }
         }
     }
 }

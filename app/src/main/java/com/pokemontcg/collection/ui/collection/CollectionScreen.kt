@@ -1,5 +1,6 @@
 package com.pokemontcg.collection.ui.collection
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhotoCamera
@@ -36,6 +36,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import com.pokemontcg.collection.R
 import com.pokemontcg.collection.data.model.CollectionItem
@@ -74,8 +76,21 @@ fun CollectionScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     var sortMenuExpanded by remember { mutableStateOf(false) }
+    var searchFieldFocused by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    fun dismissSearchInput() {
+        focusManager.clearFocus()
+        keyboardController?.hide()
+        searchFieldFocused = false
+    }
+
+    BackHandler(enabled = searchFieldFocused) {
+        dismissSearchInput()
+    }
 
     LaunchedEffect(state.priceRefreshCount) {
         state.priceRefreshCount?.let { count ->
@@ -126,12 +141,13 @@ fun CollectionScreen(
         },
     ) {
         ResponsiveScreenScope { metrics ->
-            Column(Modifier.fillMaxSize().imePadding()) {
+            Column(Modifier.fillMaxSize()) {
                 StatsHeader(state.stats, metrics)
                 CatalogSearchPanel(
                     viewModel = searchViewModel,
                     metrics = metrics,
                     onCardClick = onSearchCardClick,
+                    onSearchFocusChanged = { searchFieldFocused = it },
                 )
                 Row(
                     Modifier
